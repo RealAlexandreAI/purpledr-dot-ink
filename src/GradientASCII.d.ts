@@ -1,6 +1,4 @@
-import type { CSSProperties } from "react";
-
-export interface GradientASCIIProps {
+export interface GradientASCIIOptions {
   colors?: string[];
   shape?: "horizon" | "pinch" | "rise" | "eclipse";
   characters?: string;
@@ -24,10 +22,9 @@ export interface GradientASCIIProps {
   lightMode?: boolean;
   fontFamily?: string;
   dpr?: number;
-  className?: string;
-  style?: CSSProperties;
 }
 
-declare const GradientASCII: (props: GradientASCIIProps) => React.ReactElement;
-
-export default GradientASCII;
+export declare function mountGradientASCII(
+  container: HTMLElement,
+  options?: GradientASCIIOptions,
+): () => void;

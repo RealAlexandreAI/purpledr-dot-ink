@@ -1,9 +1,8 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [react(), cloudflare()],
+  plugins: [cloudflare()],
   server: {
     host: true,
     port: 5173,
@@ -15,5 +14,7 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    target: "es2022",
+    cssTarget: "safari16",
   },
 });

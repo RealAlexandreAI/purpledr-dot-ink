@@ -4,7 +4,7 @@
 
 Placeholder page for `purpledr.ink`. It renders one word and nothing else.
 
-The page is a Vite + React 19 single-page app. A WebGL2 [GradientASCII](https://reactbits.dev/backgrounds/gradient-ascii) field fills the top of the viewport; `PURPLEDR.INK` sits centered below it, looped through a katakana decode in [Chakra Petch](https://fonts.google.com/specimen/Chakra-Petch) by [@scrambl/react](https://scrambl.vikingz.me). There is no navigation, no copy, and no Lottie player. `public/robots.txt` disallows every crawler, and `index.html` sets `noindex, nofollow`.
+The page is a Vite + TypeScript single-page app with no UI framework: a WebGL2 [GradientASCII](https://reactbits.dev/backgrounds/gradient-ascii) field fills the top of the viewport, and `PURPLEDR.INK` sits centered below it, looping a katakana decode in [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) via [@scrambl/core](https://scrambl.vikingz.me) (which drives DOM directly — React is not needed). There is no navigation, no copy, and no Lottie player. `public/robots.txt` disallows every crawler, and `index.html` sets `noindex, nofollow`.
 
 ## What the page draws
 
@@ -17,11 +17,27 @@ page (#050408)
 | Layer | Source | Setting |
 | --- | --- | --- |
 | Backdrop | `src/GradientASCII.jsx` | Purple ramp, `scale: 1.6`, `density: 1`, `cellSize: 20`, `glow: 0.35` |
-| Title | `@scrambl/react` `useScramble` | `text: "PURPLEDR.INK"`, `chars: "katakanaFull"`, `from: "random"`, `duration: 1500`, `perturbation: 0`, `renderMode: "auto"` |
+| Title | `@scrambl/core` `scramble` (`src/scramble.ts`) | `text: "PURPLEDR.INK"`, `chars: "katakanaFull"`, `from: "random"`, `duration: 1500`, `perturbation: 0`, `renderMode: "auto"` |
 
 The scramble runs for 1500ms, holds the decoded text for 1400ms (`SCRAMBLE_PAUSE_MS`), then replays. Press `R` to restart immediately.
 
-`src/index.css` shortens animations when `prefers-reduced-motion: reduce` is set.
+With `prefers-reduced-motion: reduce` the scramble never loads: the title is set to plain text, and `src/scramble.ts` (a separate 3.7 KB gzip chunk) is not fetched.
+
+## Performance and caching
+
+The production bundle is ~24 KB raw / ~8.8 KB gzip for the entry chunk. React and its DOM runtime are gone; the page loads one small module plus the field.
+
+| Asset | Cache-Control |
+| --- | --- |
+| `/*` (HTML, `fonts.css`, favicon) | `public, max-age=0, must-revalidate` |
+| `/assets/*` (content-hashed JS/CSS) | `public, max-age=31536000, immutable` |
+| `/ChakraPetch-Bold.woff2` (fixed name) | `public, max-age=2592000, stale-while-revalidate=604800` |
+
+HTML revalidates on every visit so a deploy is visible immediately; the hashed chunks never revalidate. The font keeps a fixed filename (it is preloaded by name), so it gets 30 days rather than `immutable`.
+
+`index.html` inlines the first-paint styles for `#root` and `.hero`, so the frame and the word paints before the module bundle parses. The font is preloaded with `crossorigin` and uses `font-display: swap`. Every response also sends `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options: DENY`, and a restrictive `Permissions-Policy`.
+
+Mobile: `viewport-fit=cover` plus `env(safe-area-inset-*)` padding keep the word clear of notches; under `30rem` the title sizes from the viewport width and stays on one line. The keyboard listener still restarts the scramble with `R`. The canvas caps device pixel ratio at 2 and stops its rAF loop when the canvas scrolls out of view or the tab is hidden.
 
 ## Run
 
@@ -61,14 +77,12 @@ Both also send `X-Content-Type-Options: nosniff`.
 
 `npm run build` still writes `dist/` (Vite's `build.outDir`), so `vite preview` keeps working; `cf build`/`cf deploy` write their own tree under `.cloudflare/output/`. The Vite plugin adds `dist/wrangler.json` and `dist/.assetsignore`; `.assetsignore` keeps `wrangler.json` out of the served assets.
 
-`www.purpledr.ink` is not part of this Worker; the apex is the only hostname it owns.
-
 ## Credits
 
 | Piece | Version in the lockfile | License |
 | --- | --- | --- |
 | [GradientASCII](https://reactbits.dev/backgrounds/gradient-ascii) | copied into `src/`, no package dependency | MIT |
-| [@scrambl/react](https://www.npmjs.com/package/@scrambl/react) | 0.1.1 | MIT |
-| [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) | Google Fonts stylesheet | SIL Open Font License |
+| [@scrambl/core](https://www.npmjs.com/package/@scrambl/core) | 0.1.1 | MIT |
+| [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) | Latin subset self-hosted in `public/` | SIL Open Font License |
 
 This repository has no `LICENSE` file of its own. `package.json` sets `"private": true`, so the package is not published to npm.

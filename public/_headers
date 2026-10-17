@@ -1,7 +1,19 @@
+# Workers merges every matching rule (unlike Pages), so a /assets/ request gets
+# both blocks joined by a comma. Browsers take the last directive, which is why
+# the immutable values come second.
 /*
-  Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
+  Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+
+/ChakraPetch-Bold.woff2
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=604800
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
