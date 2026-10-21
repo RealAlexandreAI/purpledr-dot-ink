@@ -446,7 +446,9 @@ const DEFAULT_SETTINGS = {
   dpr: undefined,
 };
 
-const normalizeSettings = (options) => {
+// Exported for the tests: the clamps below are the only thing keeping an
+// out-of-range option from reaching a shader uniform.
+export const normalizeSettings = (options) => {
   const s = { ...DEFAULT_SETTINGS, ...options };
   const palette = (Array.isArray(s.colors) && s.colors.length ? s.colors : DEFAULT_COLORS).slice(0, MAX_COLORS);
   return {
@@ -826,9 +828,11 @@ export function mountGradientASCII(container, options = {}) {
   canvas.className = 'gradient-ascii-canvas';
   canvas.setAttribute('aria-hidden', 'true');
   container.appendChild(canvas);
+  // startField returns undefined when the browser has no WebGL2 or a shader
+  // fails to link. The caller still gets a disposer it can call unconditionally.
   const dispose = startField(container, canvas, normalizeSettings(options));
   return () => {
-    dispose();
+    if (dispose) dispose();
     canvas.remove();
   };
 }

@@ -5,3 +5,6 @@ dist
 .wrangler/
 .cloudflare/output/
 .cloudflare/types/
+
+# jsx transform output for the tests
+test/.build/

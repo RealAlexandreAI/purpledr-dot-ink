@@ -33,3 +33,9 @@ jobs:
       # gitignored, so nothing else would notice the build breaking.
       - name: Build
         run: npm run build
+
+      # Building only proves it compiles. These cover the option clamps that
+      # decide what reaches a shader uniform, and the disposer the page calls on
+      # unmount — neither of which a build can execute.
+      - name: Test
+        run: npm test
