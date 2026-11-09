@@ -14,10 +14,10 @@
     "@scrambl/core": "^0.1.1"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.66.0",
-    "cf": "^1.0.0-beta.26",
+    "@cloudflare/vite-plugin": "^1.67.0",
+    "cf": "^1.0.0-beta.28",
     "typescript": "^7.0.2",
-    "vite": "^8.3.5",
+    "vite": "^8.3.6",
     "wrangler": "^4.156.0"
   }
 }
